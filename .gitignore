@@ -1,0 +1,11 @@
+# secrets — never commit API keys
+.streamlit/secrets.toml
+
+# legacy local data (replaced by Supabase) and any local CSVs
+users.csv
+strategies.csv
+
+# python bytecode / caches
+__pycache__/
+*.pyc
+.pytest_cache/

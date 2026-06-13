@@ -1,0 +1,349 @@
+/* StratLab custom polish — layered on top of the base theme in .streamlit/config.toml.
+   colours/spacing come from the :root variables that ui.inject_css() injects from
+   theme.py, so this file never hard-codes a palette value. the Inter font is loaded
+   via a <link> tag in inject_css(), so there is no @import here. */
+
+/* --- typography: Inter everywhere, tabular figures for numbers --- */
+html, body, [class*="css"], .stApp {
+  font-family: var(--font), -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+}
+
+.stApp {
+  background: var(--bg);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* --- strip the default Streamlit chrome so it stops looking like a prototype --- */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+[data-testid="stToolbar"] { visibility: hidden; }
+[data-testid="stDecoration"] { display: none; }
+[data-testid="stHeader"] { background: transparent; }
+
+/* hide the "view fullscreen" button that appears on hover over charts/images */
+[data-testid="StyledFullScreenButton"] { display: none; }
+
+/* remove the big default top padding so content starts near the top */
+[data-testid="stMainBlockContainer"], .block-container {
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
+  max-width: 1200px;
+}
+
+/* --- sidebar: clean white surface with the brand on top --- */
+[data-testid="stSidebar"] {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+/* keep the sidebar always open: hide the collapse control so it can't be hidden away */
+[data-testid="stSidebarCollapseButton"] { display: none; }
+
+/* make the sidebar logo a bit larger */
+[data-testid="stSidebarHeader"] img, [data-testid="stLogo"] {
+  height: 2.75rem !important;
+  width: auto !important;
+}
+
+/* --- page header: centred title + icon in a rounded indigo box --- */
+.page-header-center {
+  text-align: center;
+}
+.page-title-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--primary);
+  color: #ffffff;
+  border-radius: var(--radius);
+  padding: 0.6rem 1.3rem;
+  margin-bottom: 0.5rem;
+}
+.page-title-box .page-title {
+  font-weight: 600;
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+.page-title-box .material-symbols-outlined {
+  font-size: 2rem;
+}
+
+/* Material Symbols icon font (loaded via @import in inject_css) */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.page-subtitle {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin-top: 0;
+}
+
+/* --- KPI card --- */
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  height: 100%;
+}
+
+.kpi-label {
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.kpi-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.2rem;
+}
+
+.kpi-hint {
+  color: var(--text);
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+/* --- type chip / pill --- */
+.chip {
+  display: inline-block;
+  background: rgba(67, 56, 202, 0.08);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* --- strategy card internals (the card border is the native st.container border) --- */
+.strategy-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.strategy-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* --- build -> analyse -> decide stepper --- */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.step {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.step.active {
+  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.step-arrow {
+  color: var(--text-muted);
+}
+
+/* --- empty state --- */
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-xl) var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+/* --- buttons: rounded, slightly bolder --- */
+.stButton > button {
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+/* --- native metric: tabular figures so KPI columns line up --- */
+[data-testid="stMetricValue"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- design polish: indigo headings, consistent surfaces --- */
+/* section subheaders in indigo */
+[data-testid="stMainBlockContainer"] h2,
+[data-testid="stMainBlockContainer"] h3 {
+  color: var(--primary);
+}
+
+/* soft shadow so cards lift off the page consistently */
+.kpi-card,
+[data-testid="stVerticalBlockBorderWrapper"] {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* multiselect tags (e.g. tickers) in the brand indigo, neatly rounded */
+[data-baseweb="tag"] {
+  border-radius: 7px;
+  background-color: var(--primary) !important;
+}
+
+/* --- tidy two-column metric tables (Return & risk, Distribution, …) --- */
+.metric-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.metric-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.metric-table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.metric-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- "?" info badge with a hover popover (opens a small window, no layout shift) --- */
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: rgba(67, 56, 202, 0.12);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+  vertical-align: middle;
+}
+.info-badge .info-pop {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 145%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: var(--text);
+  color: #ffffff;
+  text-align: left;
+  font-weight: 400;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.20);
+  z-index: 1000;
+  transition: opacity 0.12s ease;
+}
+.info-badge:hover .info-pop {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* --- start-capital -> final-value display (Evaluate) --- */
+.grow-box {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  background: rgba(67, 56, 202, 0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.55rem 1rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.grow-box .grow-arrow {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.grow-box .grow-final {
+  color: var(--primary);
+}
+.grow-box .grow-caption {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* --- data tables: black text, bold black headers and index --- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+.data-table th,
+.data-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.data-table thead th {
+  font-weight: 700;
+  text-align: right;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.data-table thead th:first-child {
+  text-align: left;
+}
+.data-table tbody th {
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+.data-table tbody td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.data-table td.best {
+  background: rgba(67, 56, 202, 0.12);
+  font-weight: 600;
+}
+.data-table td.good {
+  background: rgba(16, 185, 129, 0.16);
+  font-weight: 600;
+}
+/* a table whose headers and row labels should not be bold */
+.data-table.compact thead th,
+.data-table.compact tbody th {
+  font-weight: 400;
+}

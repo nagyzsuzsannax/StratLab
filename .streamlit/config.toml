@@ -1,0 +1,13 @@
+# base theme — the palette from theme.py expressed in Streamlit's own theme options.
+# the finer polish (Inter font, cards, spacing) is layered on top via assets/style.css.
+[theme]
+base = "light"
+primaryColor = "#4338CA"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#0F172A"
+font = "sans serif"
+
+[client]
+# we ship our own footer/menu look, so hide the default toolbar items
+toolbarMode = "minimal"
