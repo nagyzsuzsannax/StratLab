@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how matplotlib rcParams work so the same
+#colours and fonts apply to every chart
+#The logic and design decisions are our own product
+
 #design tokens for StratLab — the single source of truth for colours, font and spacing
 #both the CSS (assets/style.css via ui.inject_css) and the matplotlib charts read from
 #here, so a colour is only ever defined in this one file

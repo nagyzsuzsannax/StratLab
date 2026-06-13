@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how to let users search by company name
+#while still allowing a free-text ticker as a fallback
+#The logic and design decisions are our own product
+
 import streamlit as st
 
 #a curated universe of popular stocks and ETFs so users can search by company name

@@ -1,7 +1,15 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how Streamlit widgets keep their values across
+#reruns and how to build a dynamic form depending on the selected strategy
+#The logic and design decisions are our own product
+
 from datetime import date, timedelta
 
 import streamlit as st
 
+import prices
 import tickers
 import ui
 from services import storage
@@ -186,6 +194,14 @@ with save_cols[1]:
     save_clicked = st.button("Save strategy", type="primary", use_container_width=True)
 if save_clicked:
     errors = _validate(name, symbols, strategy_type, params, weights_total, start, end, cash_pct, rf_pct)
+    #a ticker that doesn't exist on Yahoo Finance (or has no data for this range) is silently
+    #dropped by the loader, so flag it here instead of saving a strategy with a missing ticker
+    if symbols:
+        with st.spinner("Checking tickers…"):
+            price_df = prices.load_prices(symbols, start.isoformat(), end.isoformat())
+        missing = [s for s in symbols if s not in price_df.columns]
+        if missing:
+            errors.append(f"No price data found for: {', '.join(missing)}. Check the ticker symbol.")
     #guard against duplicates and a runaway number of saved strategies
     existing = storage.load_strategies(username)
     if name.strip() in {s["name"] for s in existing}:

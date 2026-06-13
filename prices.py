@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how st.cache_data's ttl parameter works and
+#which yfinance fields load_info should expose
+#The logic and design decisions are our own product
+
 import pandas as pd
 import streamlit as st
 import yfinance as yf
@@ -8,13 +15,6 @@ from core.data import PriceLoader, load_fama_french_factors
 #design; here we add an hour-long cache so changing a dropdown does not re-download
 #everything on every rerun. core.PriceLoader only returns close prices, so the extra
 #info / volume the Explore page needs are fetched here (still UI-side, never in core/).
-
-#Error handling in this file:
-#- load_prices/load_factors delegate to core.data, which already catches its
-#  own download/parse errors (see core/data.py).
-#- load_risk_free_rate and load_info each catch any exception from yfinance
-#  and fall back to (0.04, "") / {} respectively, so a Yahoo outage degrades
-#  the page instead of crashing it.
 
 
 @st.cache_data(ttl=3600)

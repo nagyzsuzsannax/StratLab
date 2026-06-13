@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how to look up a ticker's company info via
+#yfinance
+#The logic and design decisions are our own product
+
 import math
 from datetime import date, timedelta
 

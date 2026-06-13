@@ -1,3 +1,12 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code, and to explain
+#the difference between @st.cache_resource and @st.cache_data so the Supabase
+#client is only created once instead of on every rerun
+#ChatGPT helped us understand Supabase and how to set up data persistence,
+#including how the query builder (.table().select() etc.) and .execute() work
+#The logic and design decisions (the shared client and the centralised
+#run_query error handling) are our own product
+
 import streamlit as st
 from supabase import Client, create_client
 

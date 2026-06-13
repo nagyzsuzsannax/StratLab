@@ -1,15 +1,18 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code, and to explain
+#why passwords should be hashed with SHA256 before being stored rather than
+#kept as plain text
+#ChatGPT helped us understand Supabase and how to set up data persistence,
+#including how to query and insert rows into the `users` table
+#The logic and design decisions (the login/register flow and how a failed
+#database call should be handled) are our own product
+
 import hashlib
 
 from services.db import get_client, run_query
 
 # simple login backed by a Supabase `users` table. passwords are hashed with SHA256
 # before storage and never kept in plain text. deliberately minimal for a school project.
-
-# Error handling: run_query (services/db.py) returns None if the database is
-# unreachable. login() treats a None/empty result as "not found" -> returns
-# False. register() treats a None/non-empty "taken" check as "username taken"
-# -> returns False, so a DB outage fails safe (no account created) rather than
-# raising.
 
 
 def hash_password(password: str) -> str:

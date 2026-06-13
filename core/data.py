@@ -4,13 +4,6 @@
 #Additional source: https://ranaroussi.github.io/yfinance/
 #The logic and design decisions are our own product
 
-#Error handling in this file:
-#- _download_from_yahoo catches any exception (network errors, bad tickers,
-#  missing "Close" column) and returns an empty Series, so get_prices simply
-#  skips that ticker instead of crashing the whole download.
-#- load_fama_french_factors catches download/zip/parse errors and returns an
-#  empty DataFrame with the expected columns.
-
 import io
 import re
 import zipfile

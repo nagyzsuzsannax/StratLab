@@ -1,16 +1,17 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code, and to explain
+#how to rebuild a strategy object from its saved JSONB config via the registry
+#ChatGPT helped us understand Supabase and how to set up data persistence,
+#including how to store and query JSONB columns
+#The logic and design decisions (what gets saved per strategy and how a saved
+#strategy is rebuilt) are our own product
+
 from services.db import get_client, run_query
 from strategies_config import STRATEGIES
 
 # strategies are persisted in a Supabase `strategies` table, one row each. python objects
 # cannot be stored directly, so we keep the configuration (tickers / params / kpis as JSONB)
 # and rebuild the strategy object on load via the registry.
-
-# Error handling: load_strategies() returns [] if the database is unreachable
-# (run_query returns None), and defaults missing `params`/`tickers` to {}/[].
-# Not handled: if a saved strategy's "type" or "params" no longer match the
-# current STRATEGIES registry (e.g. after a code change removes a param),
-# strategy_cls(**constructor_args) would raise. This is not expected during
-# normal use since the registry and saved data are always written together.
 
 
 def save_strategy(username: str, strategy_data: dict) -> None:

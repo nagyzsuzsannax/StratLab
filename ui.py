@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how to render custom HTML components via
+#st.markdown(..., unsafe_allow_html=True)
+#The logic and design decisions are our own product
+
 """Reusable UI components so every page looks and behaves the same.
 
 These helpers wrap st.* (and a few matplotlib charts shared across pages) and
@@ -26,6 +33,12 @@ def inject_css() -> None:
 
     Call this once near the top of the app so every page is styled. If the
     stylesheet is missing, the app still runs (just unstyled) instead of crashing.
+
+    AI Usage Declaration: the CSS assembled and injected here (and in
+    assets/style.css) is AI-generated (Claude). Streamlit's built-in theming
+    is not flexible enough to restyle individual components, so this CSS
+    overrides Streamlit's defaults directly; the resulting look (colours,
+    fonts, layout) is our own design choice.
     """
     try:
         with open(_STYLE_PATH, encoding="utf-8") as f:

@@ -69,18 +69,20 @@ def add_code(doc: Document, code_text: str) -> None:
 #--- the document content, section by section ---
 
 def write_intro(doc: Document) -> None:
-    add_title(doc, "StratLab — Project Documentation")
+    add_title(doc, "StratLab: Project Documentation")
     add_para(doc, "StratLab is a web app for building, backtesting and comparing simple "
-                  "investment strategies on real historical data — a flight simulator for "
-                  "investing: test a strategy on the past before risking real money.")
-    add_para(doc, "It is built with Python and Streamlit. All finance logic — data, strategies, "
-                  "the backtest engine, and every metric — lives in core/, which knows nothing "
-                  "about Streamlit. Streamlit pages only call into core/ and render the result.")
+                  "investment strategies on real historical data. It works like a flight "
+                  "simulator for investing: you can test a strategy on past data before "
+                  "risking real money.")
+    add_para(doc, "It is built with Python and Streamlit. All the finance logic, meaning the "
+                  "data loading, strategies, backtest engine and every metric, lives in "
+                  "core/, which knows nothing about Streamlit. The Streamlit pages just call "
+                  "into core/ and show the result.")
 
     add_heading(doc, "About the authors")
     add_para(doc, "StratLab was built by two Master in Banking and Finance students at the "
-                  "University of St. Gallen as a tool to backtest straightforward strategies in "
-                  "minutes instead of hours, without writing a line of code or paying for data.")
+                  "University of St. Gallen, as a tool to backtest simple strategies in "
+                  "minutes instead of hours, without writing code or paying for data.")
 
     add_heading(doc, "AI Usage Declaration")
     add_para(doc, "Claude was used to clean up and structure the code. ChatGPT was used to "
@@ -97,14 +99,14 @@ def write_intro(doc: Document) -> None:
 
     add_heading(doc, "Tech stack")
     add_bullets(doc, [
-        "Streamlit — web interface and multi-page navigation",
-        "pandas / numpy — price data and strategy maths",
-        "yfinance — historical prices from Yahoo Finance",
-        "scipy — skewness, kurtosis, Jarque-Bera, normal quantiles",
-        "scikit-learn — logistic regression for the Explore page's forecast",
-        "matplotlib — charts",
-        "Supabase (Postgres) — users and saved strategies",
-        "python-docx — generates this document",
+        "Streamlit: the web interface and multi-page navigation",
+        "pandas / numpy: price data and strategy maths",
+        "yfinance: historical prices from Yahoo Finance",
+        "scipy: skewness, kurtosis, the Jarque-Bera test, normal quantiles",
+        "scikit-learn: logistic regression for the next-day forecast feature",
+        "matplotlib: charts",
+        "Supabase (Postgres): stores users and saved strategies",
+        "python-docx: generates this document",
     ])
 
     add_heading(doc, "Folder structure")
@@ -130,9 +132,9 @@ def write_intro(doc: Document) -> None:
         "    assets/                <- logos, favicon, style.css\n"
         "    docs/                  <- this document\n"
         "    make_docs.py           <- regenerates this document\n")
-    add_para(doc, "Dependency direction is one-way: pages/ -> services/, prices.py, ui.py -> "
-                  "core/. Nothing in core/ imports Streamlit or services/, so the finance "
-                  "engine can be tested or reused on its own.")
+    add_para(doc, "The dependencies only go one way: pages/ use services/, prices.py and ui.py, "
+                  "which in turn use core/. Nothing in core/ imports Streamlit or services/, so "
+                  "the finance engine can be tested or reused on its own.")
 
 
 def write_core(doc: Document) -> None:
@@ -140,9 +142,9 @@ def write_core(doc: Document) -> None:
     add_para(doc, "Everything that computes a number lives in core/. The UI never does finance "
                   "maths itself.")
 
-    add_heading(doc, "core/data.py — PriceLoader", size=13)
+    add_heading(doc, "core/data.py: PriceLoader", size=13)
     add_bullets(doc, [
-        "PriceLoader().get_prices(tickers, start, end) -> DataFrame downloads daily "
+        "PriceLoader().get_prices(tickers, start, end) returns a DataFrame of daily "
         "adjusted-close prices from Yahoo Finance, one column per ticker. A ticker that "
         "fails to download is skipped silently.",
         "load_fama_french_factors(model) downloads monthly Fama-French factors "
@@ -151,43 +153,66 @@ def write_core(doc: Document) -> None:
         "core/data.py is deliberately cache-free; prices.py adds an st.cache_data layer for "
         "the UI.",
     ])
+    add_para(doc, "Error handling: _download_from_yahoo and load_fama_french_factors each "
+                  "catch any exception during download or parsing and return an empty "
+                  "Series/DataFrame, so one bad ticker or a Ken French outage does not crash "
+                  "the page.")
 
-    add_heading(doc, "core/strategy.py — the five strategies", size=13)
-    add_para(doc, "Every strategy is a small class with the same interface: __init__ takes its "
-                  "own parameters plus a shared rebalance_every (trading days between "
-                  "rebalances, default 252), and get_weights(prices) -> dict[ticker, weight] "
-                  "returns the target weights for \"today\" (or the unchanged current_weights "
-                  "if it is not yet time to rebalance). Two shared helpers, "
-                  "_should_rebalance(...) and _normalise_weights(...), factor out logic that "
-                  "would otherwise repeat in every strategy.")
+    add_heading(doc, "core/strategy.py: the five strategies", size=13)
+    add_para(doc, "Every strategy is a small class with the same interface. __init__ takes its "
+                  "own parameters plus a shared rebalance_every value (the number of trading "
+                  "days between rebalances, default 252). get_weights(prices) returns a dict "
+                  "of target weights for \"today\", or the same weights as before if it is not "
+                  "yet time to rebalance. Three shared helper functions, _should_rebalance(...), "
+                  "_normalise_weights(...) and build_weights(...), avoid repeating this logic "
+                  "in every strategy.")
     add_bullets(doc, [
-        "EqualWeight — splits the portfolio evenly across all tickers (the \"1/N\" rule), "
-        "shown by DeMiguel, Garlappi & Uppal (2009) to be a tough benchmark to beat.",
-        "FixedWeight — uses weights the user specifies (e.g. 60/40 stocks/bonds).",
-        "Momentum — ranks assets by past return over a lookback window and goes long the "
-        "top performers (optionally short the worst), per Jegadeesh & Titman (1993).",
-        "InverseVolatility — weights each asset by the inverse of its volatility, so calmer "
-        "assets get more weight.",
-        "MeanVariance — the Markowitz (1952) tangency portfolio: w = Sigma^-1 * mu, "
-        "normalised, with negative weights clipped to zero. Optionally uses an "
-        "exponentially weighted (EWMA / RiskMetrics) covariance matrix instead of the "
-        "sample covariance.",
+        "EqualWeight: splits the portfolio evenly across all tickers (the \"1/N\" rule). "
+        "DeMiguel, Garlappi and Uppal (2009) showed this is a tough benchmark to beat.",
+        "FixedWeight: uses weights chosen by the user (for example 60/40 stocks/bonds).",
+        "Momentum: ranks assets by their past return over a lookback window and goes long "
+        "the top performers (optionally short the worst ones), based on Jegadeesh and "
+        "Titman (1993).",
+        "InverseVolatility: weights each asset by the inverse of its volatility, so calmer "
+        "assets get a bigger weight.",
+        "MeanVariance: the Markowitz (1952) tangency portfolio. Weights are w = Sigma^-1 * "
+        "mu, normalised so they sum to 1, with negative weights clipped to zero. It can "
+        "optionally use an exponentially weighted (EWMA / RiskMetrics) covariance matrix "
+        "instead of the plain sample covariance.",
     ])
     add_para(doc, "MeanVariance and InverseVolatility need a minimum amount of return history "
-                  "(more observations than assets, or at least two observations) before their "
-                  "covariance/volatility is defined; until then they hold cash (empty weights), "
-                  "so the equity curve stays flat instead of producing NaN.")
+                  "before their covariance or volatility is defined (more observations than "
+                  "assets, or at least two observations). Until then they hold cash (empty "
+                  "weights), so the equity curve stays flat instead of showing NaN.")
+    add_para(doc, "Error handling: _normalise_weights returns all-zero weights instead of "
+                  "dividing by zero (for example, when MeanVariance clips every weight to "
+                  "zero). EqualWeight and Momentum stay in cash if there are no tickers or top "
+                  "performers, Momentum treats a 0 starting price as a 0% return, "
+                  "InverseVolatility gives a zero-volatility ticker a weight of 0, and "
+                  "MeanVariance uses np.linalg.pinv instead of np.linalg.inv so a singular "
+                  "covariance matrix (for example, two identical tickers) does not raise an "
+                  "error.")
 
-    add_heading(doc, "core/backtest.py — Backtest", size=13)
-    add_para(doc, "Backtest().run(strategy, prices) -> Series walks forward through the price "
-                  "history one day at a time. On each day it passes only the prices up to that "
-                  "day to strategy.get_weights() (no look-ahead bias), computes the weighted "
-                  "daily return from each ticker's price change, and grows the portfolio value "
-                  "(starting at 1.0) by that return. The result is stored on self.portfolio and "
-                  "returned. All KPIs are then computed from this series via "
-                  "core/measures.py — Backtest itself has no KPI methods.")
+    add_heading(doc, "core/backtest.py: Backtest", size=13)
+    add_para(doc, "Backtest().run(strategy, prices) walks forward through the price history "
+                  "one day at a time. On each day it gives strategy.get_weights() only the "
+                  "prices up to that day, so there is no look-ahead bias. It then works out "
+                  "the weighted daily return from each ticker's price change, and grows the "
+                  "portfolio value (starting at 1.0) by that return. The result is a Series, "
+                  "stored on self.portfolio and also returned. All KPIs are then computed from "
+                  "this series using core/measures.py; Backtest itself has no KPI methods.")
+    add_para(doc, "Error handling: a ticker missing from the price data for a given day is "
+                  "skipped (it contributes nothing to that day's return), and a ticker with a "
+                  "0 price the day before is also skipped for that day, instead of dividing by "
+                  "zero. If given 0 or 1 rows of prices (a 0-length period), the day-by-day "
+                  "loop never runs and run() returns an empty Series rather than raising an "
+                  "error; the Evaluate and Compare pages avoid this case by checking that there "
+                  "are at least 2 rows of price data before calling Backtest at all. As an extra "
+                  "safety net, each day's calculation is also wrapped in its own try/except: if "
+                  "a strategy raises an unexpected error on one day, that day simply carries the "
+                  "portfolio value forward unchanged instead of crashing the whole backtest.")
 
-    add_heading(doc, "core/measures.py — finance formulas + Analytics", size=13)
+    add_heading(doc, "core/measures.py: finance formulas and the Analytics class", size=13)
     add_para(doc, "A library of stand-alone functions, each with a short docstring explaining "
                   "the formula:")
     add_bullets(doc, [
@@ -199,161 +224,210 @@ def write_core(doc: Document) -> None:
         "variance-covariance VaR (t*mu + sqrt(t)*sigma*z, for 1-day and 1-month horizons).",
         "Factor models: CAPM, Fama-French 3- and 5-factor monthly regressions "
         "(alpha, beta, t-/p-values, R-squared, appraisal ratio).",
-        "Portfolio construction: EWMA covariance (RiskMetrics), the cash/risk-free "
-        "overlay, trading/management cost application, annual turnover, and the "
-        "Markowitz (1952) minimum-variance frontier.",
+        "Portfolio construction: EWMA covariance (RiskMetrics) for the MeanVariance "
+        "strategy, common_window to align tickers that start on different dates, and "
+        "the cash/risk-free overlay, trading/management cost application and annual "
+        "turnover used to turn a gross backtest into a net one.",
     ])
+    add_para(doc, "factor_model(asset_excess, factors, periods_per_year) and its one-factor "
+                  "wrapper capm(...) regress an asset's excess return on one or more factors "
+                  "(R - Rf = alpha + B * factors + eps) using the private helper _ols. _ols "
+                  "performs ordinary least squares with an intercept: it builds a design "
+                  "matrix X = [1, factors], solves for the coefficients with "
+                  "np.linalg.lstsq, then computes the residuals as y - X @ coef (matrix "
+                  "multiplication: the fitted values), the sum of squared residuals as "
+                  "residuals @ residuals (a dot product), and R-squared. The coefficient "
+                  "standard errors (for the t-stats and p-values) come from "
+                  "sigma^2 * (X'X)^-1, using np.linalg.pinv instead of an exact inverse so "
+                  "near-collinear factors do not raise an error.")
     add_para(doc, "Analytics(values, benchmark_values, rf_annual) bundles these into one object "
                   "so a page can pull every measure for one portfolio (and its benchmark) "
                   "without re-deriving returns each time. This is what Evaluate and Compare "
                   "use for their KPI cards and tables.")
+    add_para(doc, "log_returns is not currently called from any page or other core function. "
+                  "It was added during backend development for possible future use (e.g. "
+                  "log-return-based statistics) and left in for that reason.")
+    add_para(doc, "Error handling: sharpe_ratio, sortino_ratio, treynor_ratio, cagr and "
+                  "historic_var return NaN instead of dividing by zero or indexing into empty "
+                  "data, for very short or unusual return series. The factor-model helper _ols "
+                  "returns NaN for statistics that need more observations than parameters, and "
+                  "uses pinv instead of inv so near-collinear factors do not raise an error. "
+                  "Analytics.beta returns NaN instead of dividing by zero if the benchmark has "
+                  "zero (or undefined) variance, for example a flat-priced benchmark or too few "
+                  "aligned observations.")
 
-    add_heading(doc, "core/forecast.py — next-day direction forecast", size=13)
-    add_para(doc, "predict_direction(prices, n_lags=10) is a small machine-learning add-on for "
-                  "the Explore page. Each day's features are the previous n_lags daily "
-                  "returns, and the label is whether that day's return was positive. A "
-                  "scikit-learn LogisticRegression is trained on a chronological 80/20 "
-                  "split (so the test set is always later in time than the training set), "
-                  "and the function returns the test-set accuracy plus the predicted "
-                  "probability that tomorrow's return is positive, based on the most recent "
-                  "n_lags returns. Returns None if there is not enough price history "
-                  "(fewer than n_lags + 30 return observations) to train and test the model.")
+    add_heading(doc, "core/forecast.py: next-day direction forecast", size=13)
+    add_para(doc, "predict_direction(prices, n_lags=10) is a small machine-learning add-on "
+                  "used on the Explore and Evaluate pages. Each day's features are the "
+                  "previous n_lags daily returns, and the label is whether that day's return "
+                  "was positive. A scikit-learn LogisticRegression model is trained on a "
+                  "chronological 80/20 split, so the test set is always later in time than "
+                  "the training set. The function returns the test-set accuracy plus the "
+                  "predicted probability that tomorrow's return will be positive, based on "
+                  "the most recent n_lags returns. It returns None if there is not enough "
+                  "price history (fewer than n_lags + 30 return observations) to train and "
+                  "test the model.")
+    add_para(doc, "Error handling: predict_direction returns None if there is not enough "
+                  "price history to train and test a model. The Explore and Evaluate pages "
+                  "show an info message instead of the Forecast section in that case.")
 
 
 def write_services(doc: Document) -> None:
-    add_heading(doc, "services/ — persistence layer")
+    add_heading(doc, "services/: persistence layer")
     add_para(doc, "Users and saved strategies live in a hosted Supabase (Postgres) database, "
                   "reached through a single cached client. Credentials sit in "
                   ".streamlit/secrets.toml (excluded from version control).")
     add_bullets(doc, [
-        "db.py — get_client() returns a cached Supabase client. run_query(builder) executes "
-        "a query and returns its data, or shows st.error(...) and returns None on any "
-        "exception, so a database error surfaces as a message instead of a crash.",
-        "auth.py — login(username, password) and register(username, password); passwords "
-        "are hashed with SHA256 and never stored in plain text.",
-        "storage.py — save_strategy, load_strategies, delete_strategy and update_kpis. Each "
-        "saved strategy is one row (tickers/params/kpis as JSONB); load_strategies rebuilds "
-        "the strategy object via strategies_config.STRATEGIES and returns [] if the "
-        "database is unreachable.",
+        "db.py: get_client() builds the Supabase client from "
+        ".streamlit/secrets.toml (the [supabase] url and key) and is decorated with "
+        "@st.cache_resource, so it is created once and reused across reruns instead of "
+        "opening a new connection on every interaction. run_query(builder) takes a "
+        "Supabase query builder (e.g. client.table(\"users\").select(\"password\").eq(...)), "
+        "calls builder.execute().data, and returns its data, or shows st.error(...) and "
+        "returns None if anything goes wrong, so a database error shows up as a message "
+        "instead of crashing the app. Every function in auth.py and storage.py goes "
+        "through this one chokepoint.",
+        "auth.py: login(username, password) looks up the stored password hash for that "
+        "username and compares it to hash_password(password) (SHA256), returning True only "
+        "if they match (and False if the user does not exist). register(username, password) "
+        "first checks whether the username is already taken; if not, it inserts a new row "
+        "with the username and its hashed password. Passwords are hashed with SHA256 and "
+        "never stored or compared in plain text.",
+        "storage.py: save_strategy(username, strategy_data) inserts one row per saved "
+        "strategy, storing name, type, tickers, start/end dates, params and kpis (tickers, "
+        "params and kpis as JSONB). load_strategies(username) reads back every row for that "
+        "user (oldest first), and for each one rebuilds the actual strategy object via "
+        "strategies_config.STRATEGIES[row[\"type\"]] and the saved params (filtering out "
+        "underscore-prefixed config keys like _cash/_risk_free, which are not constructor "
+        "arguments), returning [] if the database cannot be reached. delete_strategy(username, "
+        "name) removes one row by username and name, and update_kpis(username, name, kpis) "
+        "overwrites just the kpis column after a re-run, leaving the rest of the saved "
+        "configuration untouched.",
     ])
+    add_para(doc, "Error handling: every Supabase call goes through run_query, which catches "
+                  "exceptions, shows an error message, and returns None or an empty list so "
+                  "callers fall back to their normal empty-state display. login and register "
+                  "in auth.py treat that None as \"not found\" or \"taken\", so a database "
+                  "outage fails safely. load_strategies in storage.py returns [] if the "
+                  "database is unreachable, and defaults a saved strategy's missing "
+                  "params/tickers to {}/[]. Not handled: if a saved strategy's type or params "
+                  "no longer match the current strategies_config.STRATEGIES registry (for "
+                  "example after a code change removes a parameter), rebuilding it with "
+                  "strategy_cls(**constructor_args) would raise; this is not expected during "
+                  "normal use since the registry and saved data are always written together.")
 
 
 def write_ui(doc: Document) -> None:
     add_heading(doc, "Shared UI building blocks")
-    add_para(doc, "theme.py holds every colour, font and spacing value as plain constants; "
-                  "both assets/style.css (via ui.inject_css) and the matplotlib charts (via "
-                  "theme.apply_mpl_theme) read from it, so a colour is only ever defined once. "
-                  "ui.py provides thin Streamlit "
-                  "wrappers used on every page: page_header, kpi_card, verb_stepper, "
-                  "empty_state, next_step and data_table, plus two shared chart helpers — "
-                  "rebase_to_100 (index a series/frame to 100, used for every equity-curve "
-                  "chart) and cml_chart (the risk/return scatter with the Capital Market Line, "
-                  "used by Evaluate and Compare).")
+    add_para(doc, "theme.py holds every colour, font and spacing value as plain constants. "
+                  "Both assets/style.css (via ui.inject_css) and the matplotlib charts (via "
+                  "theme.apply_mpl_theme) read from these constants, so each colour is only "
+                  "defined once. ui.py provides simple Streamlit wrappers used on every page: "
+                  "page_header, kpi_card, verb_stepper, empty_state, next_step and data_table. "
+                  "It also has two shared chart helpers: rebase_to_100 (indexes a series or "
+                  "frame to 100, used for every equity-curve chart) and cml_chart (the "
+                  "risk/return scatter with the Capital Market Line, used by Evaluate and "
+                  "Compare). Error handling: cml_chart renders nothing if the benchmark has "
+                  "zero or negative volatility, avoiding a division by zero in the Capital "
+                  "Market Line slope.")
     add_para(doc, "strategies_config.py is the single registry the whole UI reads: each "
                   "strategy is listed once with its class, display label and the "
                   "strategy-specific parameters the Builder should ask for. Adding a strategy "
                   "is therefore a two-step job: write the class in core/strategy.py, then add "
-                  "one registry entry — no page code changes.")
+                  "one registry entry. No page code needs to change.")
+    add_para(doc, "prices.py adds a thin, UI-side st.cache_data layer around core/data.py (so "
+                  "changing a dropdown does not re-download everything), plus two extra Yahoo "
+                  "Finance lookups core/data.py does not provide: load_risk_free_rate and "
+                  "load_info. Error handling: both catch any yfinance exception and fall back "
+                  "to (0.04, \"\") and {} respectively, so a Yahoo outage degrades the page "
+                  "instead of crashing it.")
 
     add_heading(doc, "Build -> Evaluate -> Compare", size=13)
     add_bullets(doc, [
-        "Builder (pages/1_Builder.py) — configure a strategy: tickers, type and its "
+        "Builder (pages/1_Builder.py): lets you set up a strategy (tickers, type and its "
         "registry-driven parameters, rebalancing frequency, an optional cash/risk-free "
-        "overlay, and trading/management fees. _validate(...) collects every reason the "
-        "strategy cannot be saved yet and the page lists them together. On success, "
-        "storage.save_strategy persists the configuration (not a backtest result).",
-        "Evaluate (pages/2_Evaluate.py) — reconstructs one saved strategy via the registry, "
+        "overlay, and trading/management fees). _validate(...) collects every reason the "
+        "strategy cannot be saved yet, and the page lists them together. On Save, it also "
+        "loads prices for the selected tickers and date range, and adds an error naming any "
+        "ticker that came back with no data (for example, a typo or a delisted symbol). On "
+        "success, storage.save_strategy saves the configuration (not a backtest result).",
+        "Evaluate (pages/2_Evaluate.py): rebuilds one saved strategy using the registry, "
         "runs it through Backtest alongside a benchmark (EqualWeight on the chosen "
         "benchmark ticker), applies the cash/risk-free overlay and fees to turn the gross "
-        "curve into the net curve, and renders KPIs, factor models, charts and the CML for "
-        "that one strategy.",
-        "Compare (pages/3_Compare.py) — does the same for two or more saved strategies over "
-        "the period they all share (latest common start to earliest common end), ranking "
-        "them in a Key Metrics table, a Costs table and a combined CML chart.",
+        "curve into the net curve, and shows KPIs, factor models, charts, the CML and a "
+        "forecast for that strategy.",
+        "Compare (pages/3_Compare.py): does the same for two or more saved strategies, over "
+        "the period they all share (the latest common start date to the earliest common "
+        "end date). It ranks them in a Key Metrics table, a Costs table and a combined CML "
+        "chart.",
     ])
     add_para(doc, "pages/0_Home.py is the entry point: it lists saved strategies with their "
                   "last-stored KPIs (so the page loads without re-running a backtest) and "
                   "links into Build/Evaluate/Compare. Its Update button re-runs Backtest with "
-                  "fresh data up to yesterday and persists the refreshed KPIs.")
-    add_para(doc, "pages/4_Explore.py lets a user research tickers (price chart, CAGR/volatility "
-                  "stats, fundamentals, correlation heatmap) before building a strategy. For a "
-                  "single selected ticker, it also shows a Forecast section powered by "
-                  "core/forecast.py: the model's historical test accuracy and its predicted "
-                  "probability that tomorrow's return is positive, with a note that this is "
-                  "for educational purposes only. "
-                  "pages/5_Glossary.py is a searchable, colour-coded reference explaining every "
+                  "fresh data up to yesterday and saves the refreshed KPIs.")
+    add_para(doc, "Error handling: Backtest().run(...) in Home (Update), Evaluate and Compare "
+                  "is wrapped in try/except. Home shows a toast and keeps the existing KPIs, "
+                  "Evaluate shows a warning instead of the charts, and Compare skips the "
+                  "failing strategy with a warning and continues with the others.")
+    add_para(doc, "pages/4_Explore.py lets a user research tickers (price chart, CAGR/"
+                  "volatility stats, fundamentals, correlation heatmap) before building a "
+                  "strategy. For each selected ticker, it also shows a Forecast section "
+                  "powered by core/forecast.py, with the model's historical test accuracy and "
+                  "its predicted probability that tomorrow's return will be positive, with a "
+                  "note that this is for educational purposes only. If a selected ticker comes "
+                  "back with no price data (for example, a typo or a delisted symbol), the page "
+                  "shows a warning naming it instead of silently showing fewer results.")
+    add_para(doc, "pages/5_Glossary.py is a searchable, colour-coded reference explaining every "
                   "metric and strategy with its formula and an academic citation where "
                   "relevant (Markowitz, 1952; DeMiguel, Garlappi & Uppal, 2009; Jegadeesh & "
                   "Titman, 1993; Fama & French, 1993/2015).")
 
 
-def write_error_handling(doc: Document) -> None:
-    add_heading(doc, "Error handling")
-    add_para(doc, "A consistent, lightweight safety net prevents unhandled tracebacks without "
-                  "changing the golden-path UI:")
-    add_bullets(doc, [
-        "services/db.py — every Supabase call goes through run_query, which catches "
-        "exceptions, shows st.error(...), and returns None/[] so callers fall back to their "
-        "normal empty-state rendering. login()/register() in services/auth.py treat that "
-        "None as \"not found\"/\"taken\", so a database outage fails safe.",
-        "core/data.py — _download_from_yahoo and load_fama_french_factors wrap their "
-        "download/parse in try/except and return an empty Series/DataFrame on failure, so "
-        "one bad ticker or a Ken French download outage does not crash the page.",
-        "prices.py — load_risk_free_rate and load_info each catch any yfinance exception and "
-        "fall back to (0.04, \"\") / {} respectively.",
-        "core/strategy.py — _normalise_weights returns all-zero weights instead of dividing "
-        "by zero (e.g. when MeanVariance clips every weight to 0); EqualWeight and Momentum "
-        "stay in cash if there are no tickers/top performers; Momentum treats a 0 starting "
-        "price as a 0% return; InverseVolatility gives a zero-volatility ticker weight 0; "
-        "MeanVariance uses np.linalg.pinv instead of inv so a singular covariance matrix "
-        "(e.g. two identical tickers) does not raise.",
-        "core/backtest.py — Backtest.run skips a ticker for a day if its previous price is 0, "
-        "instead of dividing by zero.",
-        "core/measures.py — sharpe_ratio, sortino_ratio, treynor_ratio, cagr and historic_var "
-        "all return NaN instead of dividing by zero or indexing into empty data for very "
-        "short or degenerate return series.",
-        "core/forecast.py — predict_direction returns None if there is not enough price "
-        "history to train and test a model, and the Explore page shows an info message "
-        "instead of the Forecast section in that case.",
-        "Backtest runs — Backtest().run(...) in Home (Update), Evaluate and Compare are "
-        "wrapped in try/except: Home shows a toast and keeps the existing KPIs, Evaluate "
-        "shows a warning instead of the charts, and Compare skips the failing strategy with "
-        "a warning and continues with the others.",
-        "ui.cml_chart — renders nothing if the benchmark has zero or negative volatility, "
-        "avoiding a division by zero in the Capital Market Line slope.",
-    ])
-
-
 def write_collinearity(doc: Document) -> None:
     add_heading(doc, "Collinearity handling")
-    add_para(doc, "Several models in StratLab use inputs that can be highly correlated with "
-                  "each other (e.g. two near-identical tickers, or Fama-French factors that "
-                  "move together). Rather than letting that crash the page with a singular-"
-                  "matrix error, each model is built on a numerically robust method:")
-    add_bullets(doc, [
-        "core/strategy.py — MeanVariance computes weights as the inverse covariance matrix "
-        "times the mean returns (w = Sigma^-1 * mu). If two tickers are perfectly or near-"
-        "perfectly correlated, Sigma is singular; np.linalg.pinv (pseudo-inverse) is used "
-        "instead of np.linalg.inv, so the calculation returns a result instead of raising.",
-        "core/measures.py — the CAPM/FF3/FF5 factor regressions (_ols/factor_model) use "
-        "np.linalg.lstsq for the coefficients (robust to a rank-deficient design matrix when "
-        "factors are collinear) and np.linalg.pinv for the standard-error covariance matrix, "
-        "for the same reason.",
-        "core/forecast.py — the next-day forecast uses the last n_lags daily returns as "
-        "features, which are often correlated with each other (momentum/mean reversion). "
-        "scikit-learn's LogisticRegression is used with its default L2 (ridge) penalty, "
-        "which shrinks correlated coefficients to stable, finite values instead of the "
-        "unstable estimates an unregularised fit would produce.",
-    ])
+    add_para(doc, "Highly correlated inputs (near-identical tickers, or Fama-French factors "
+                  "that move together) can make a covariance or design matrix singular. "
+                  "Instead of crashing, MeanVariance and the factor regressions in "
+                  "core/measures.py use np.linalg.pinv/lstsq (a pseudo-inverse / "
+                  "least-squares solve) to still return a result, and the forecast model in "
+                  "core/forecast.py relies on scikit-learn's default L2 (ridge) penalty to "
+                  "keep correlated coefficients stable.")
 
 
 def write_style(doc: Document) -> None:
     add_heading(doc, "Coding style")
-    add_para(doc, "Small, single-purpose functions with type hints, plain readable loops over "
-                  "clever one-liners, and short comments that explain why rather than what. "
-                  "Every pages/*.py file follows the same layout: imports, then session-state "
-                  "setup, then _-prefixed helper functions, then the page render code after a "
-                  "'# --- PAGE ---' marker. Streamlit code never appears in core/.")
+    add_para(doc, "Small, single-purpose functions with type hints. Plain, readable loops "
+                  "instead of clever one-liners, and short comments that explain why rather "
+                  "than what. Every pages/*.py file follows the same layout: imports, then "
+                  "session-state setup, then _-prefixed helper functions, then the page's "
+                  "render code after a '# --- PAGE ---' marker. Streamlit code never appears "
+                  "in core/.")
+
+
+def write_ai_usage(doc: Document) -> None:
+    add_heading(doc, "AI usage summary")
+    add_para(doc, "Every source file carries its own \"AI Usage Declaration\" comment at the "
+                  "top, describing what AI was used for in that specific file. This section "
+                  "summarises that usage across the project.")
+    add_bullets(doc, [
+        "Claude was used throughout core/ and services/ to clean up, document and structure "
+        "the code, and to explain specific concepts on request (for example, the "
+        "@st.cache_resource vs @st.cache_data distinction, and why passwords should be "
+        "hashed before storage).",
+        "Claude Code was used to generate parts of the frontend code (app.py, the pages/, "
+        "ui.py, theme.py, prices.py, strategies_config.py and tickers.py).",
+        "ChatGPT was used to understand third-party tools and APIs: Supabase (the query "
+        "builder, .execute(), JSONB columns) for the persistence layer, and Streamlit/"
+        "matplotlib/yfinance concepts (session_state, caching, widgets, rcParams) for the "
+        "frontend.",
+        "The CSS in assets/style.css and the CSS assembled by ui.inject_css is AI-generated "
+        "(Claude), because Streamlit's built-in theming is not flexible enough to restyle "
+        "individual components.",
+    ])
+    add_para(doc, "In every case, the underlying logic and design decisions (what the app "
+                  "does, how data flows, and how errors are handled) are our own; AI was used "
+                  "for implementation help, clean-up, documentation and explaining unfamiliar "
+                  "concepts.")
 
 
 def build_document() -> None:
@@ -366,9 +440,9 @@ def build_document() -> None:
     write_core(doc)
     write_services(doc)
     write_ui(doc)
-    write_error_handling(doc)
     write_collinearity(doc)
     write_style(doc)
+    write_ai_usage(doc)
 
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     #the file is locked while it is open in Word or syncing in OneDrive - fail with a

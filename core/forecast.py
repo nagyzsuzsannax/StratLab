@@ -2,10 +2,6 @@
 #Claude was used to clean up, document and structure this code
 #The logic and design decisions are our own product
 
-#Error handling in this file:
-#- predict_direction returns None if there is not enough price history to
-#  train and test a model, instead of crashing on an empty/short series.
-
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression

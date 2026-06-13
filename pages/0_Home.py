@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how to show different content depending on
+#whether a user is logged in
+#The logic and design decisions are our own product
+
 import base64
 import os
 from datetime import date, timedelta

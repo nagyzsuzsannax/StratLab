@@ -1,3 +1,10 @@
+#AI Usage Declaration
+#Claude was used to clean up, document and structure this code
+#Claude Code was used to generate parts of this code
+#ChatGPT helped us understand how to structure a single registry so adding
+#a strategy does not require changing page code
+#The logic and design decisions are our own product
+
 from core.strategy import EqualWeight, FixedWeight, InverseVolatility, MeanVariance, Momentum
 
 #the strategy registry — the single place the whole UI learns about strategies.

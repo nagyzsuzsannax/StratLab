@@ -1,3 +1,11 @@
+/* AI Usage Declaration
+   All CSS in this file is AI-generated (Claude). Streamlit's built-in
+   theming (.streamlit/config.toml) is not flexible enough to restyle
+   individual components (cards, tables, steppers, etc.), so this
+   stylesheet overrides Streamlit's default styles directly. The colours,
+   fonts and layout choices are our own; the CSS syntax to achieve them
+   was written by AI. */
+
 /* StratLab custom polish — layered on top of the base theme in .streamlit/config.toml.
    colours/spacing come from the :root variables that ui.inject_css() injects from
    theme.py, so this file never hard-codes a palette value. the Inter font is loaded

@@ -4,18 +4,6 @@
 #Management) course at the University of St. Gallen
 #The logic and design decisions are our own product
 
-#Error handling in this file:
-#- sharpe_ratio/sortino_ratio/treynor_ratio return NaN instead of dividing by
-#  zero when volatility/downside deviation/beta is 0.
-#- cagr returns NaN instead of dividing by zero for a too-short series or one
-#  that starts at 0.
-#- historic_var returns NaN instead of indexing into an empty array when
-#  `returns` is empty.
-#- _ols/factor_model return NaN for stats that need more observations than
-#  parameters (dof <= 0) or a non-zero residual std, and use pinv (not inv) so
-#  near-collinear factors do not raise.
-
-
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -43,6 +31,9 @@ def log_returns(prices: pd.Series) -> pd.Series:
 
 def to_monthly_returns(values: pd.Series) -> pd.Series:
     """Resample month-end values to monthly simple returns (used for the factor-model regressions)."""
+    # resample groups the daily prices into monthly buckets and .last() keeps the
+    # month-end price from each bucket. "ME" and "M" both mean month-end; "ME" is the
+    # newer name (pandas >= 2.2), "M" the older one
     try:
         monthly = values.resample("ME").last()
     except ValueError:
@@ -415,6 +406,10 @@ class Analytics:
             return float("nan")
         aligned = pd.concat([self.returns, self.benchmark_returns], axis=1, join="inner").dropna()
         cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
+        # a zero (or NaN) benchmark variance would divide by zero, e.g. a flat-priced
+        # benchmark or too few aligned observations
+        if not cov[1, 1] > 0:
+            return float("nan")
         return float(cov[0, 1] / cov[1, 1])
 
     def alpha_annualized(self) -> float:

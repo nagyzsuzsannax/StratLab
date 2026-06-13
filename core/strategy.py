@@ -4,17 +4,6 @@
 #Quantitative Asset Management) course at the University of St. Gallen
 #The logic and design decisions are our own product
 
-#Error handling in this file:
-#- _normalise_weights returns all-zero weights instead of dividing by zero if
-#  the inputs sum to 0 (e.g. MeanVariance clips every weight to 0).
-#- EqualWeight/Momentum return the previous weights (stay in cash on the very
-#  first call) instead of dividing by zero if there are no tickers/top performers.
-#- InverseVolatility treats a zero-volatility ticker as weight 0 instead of
-#  dividing by zero.
-#- MeanVariance uses a pseudo-inverse (np.linalg.pinv) instead of np.linalg.inv,
-#  so a singular covariance matrix (e.g. two identical tickers) does not raise.
-#- Momentum treats a 0 starting price as a 0% return instead of dividing by zero.
-
 import numpy as np
 import pandas as pd
 
