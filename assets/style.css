@@ -48,6 +48,8 @@ footer { visibility: hidden; }
 [data-testid="stSidebar"] {
   background: var(--surface);
   border-right: 1px solid var(--border);
+  min-width: 300px;
+  width: 300px;
 }
 
 /* keep the sidebar always open: hide the collapse control so it can't be hidden away */
