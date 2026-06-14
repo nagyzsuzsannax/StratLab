@@ -5,8 +5,8 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 
-#regenerates docs/StratLab_Documentation.docx from scratch so the document always
-#reflects the current state of the app. run `python make_docs.py` after structural changes.
+#regenerates docs/StratLab_Documentation.docx from scratch so the document always reflects
+#the current state of the app. run `python make_docs.py` after structural changes.
 
 #colours mirror the app palette in theme.py so the document looks on-brand
 PRIMARY = RGBColor(0x43, 0x38, 0xCA)
