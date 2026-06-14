@@ -18,7 +18,7 @@ then Compare and Decide.**
 When you open StratLab you land on a welcome screen.
 
 <p align="center">
-  <img src="login.png" alt="The StratLab welcome screen" width="600">
+  <img src="login.png" alt="The StratLab welcome screen" width="400">
 </p>
 
 - If no database is connected, you simply click **"Enter StratLab (guest)"** and you
