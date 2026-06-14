@@ -20,7 +20,7 @@ _LOGO = os.path.join(_ASSETS, "logo-lockup.svg")
 _MARK = os.path.join(_ASSETS, "logo-mark.svg")
 _FAVICON = os.path.join(_ASSETS, "favicon.svg")
 
-st.set_page_config(page_title="StratLab", page_icon=_FAVICON, layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="StratLab", page_icon=_FAVICON, layout="wide", initial_sidebar_state="expanded")
 
 #inject the theme and apply it to matplotlib on every run, before anything renders
 ui.inject_css()
@@ -126,4 +126,3 @@ if "username" not in st.session_state:
     login_screen()
 else:
     main_app()
-
