@@ -82,9 +82,6 @@ We split the documentation by who it is for:
 - **[Developer Guide](docs/DEVELOPER.md)**: how the code is structured, how the
   finance engine works, how to connect Supabase, and how to add your own strategy.
 
-There is also a generated `docs/StratLab_Documentation.docx` with the developer
-content in Word format. Regenerate it with `python make_docs.py`.
-
 ## Project structure (short version)
 
 ```
@@ -94,7 +91,6 @@ core/                   pure finance logic, no Streamlit (strategies, backtest, 
 services/               persistence (auth, saved strategies): Supabase, with a guest fallback
 ui.py / theme.py        shared UI components and styling
 strategies_config.py    registry of available strategy types
-make_docs.py            regenerates docs/StratLab_Documentation.docx
 ```
 
 The full module-by-module breakdown is in the [Developer Guide](docs/DEVELOPER.md).

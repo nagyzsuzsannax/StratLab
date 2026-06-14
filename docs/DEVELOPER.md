@@ -1,9 +1,7 @@
 # StratLab Developer Guide
 
 This guide explains how StratLab is built: the architecture, the finance engine, the
-persistence layer, and how to extend it with your own strategy. It is the same
-content as the generated `StratLab_Documentation.docx`, kept in Markdown so it renders
-directly on GitHub.
+persistence layer, and how to extend it with your own strategy.
 
 ## Overview
 
@@ -27,7 +25,6 @@ finance engine can be tested or reused on its own.
 - **matplotlib**: charts.
 - **Supabase (Postgres)**: stores users and saved strategies (optional, with a guest
   fallback so the app also runs without it).
-- **python-docx**: generates the Word version of this document.
 
 ## Folder structure
 
@@ -50,8 +47,7 @@ strategies_config.py   strategy registry for the UI
 prices.py              cached price/fundamentals loader
 tickers.py             searchable universe of stocks/ETFs
 assets/                logos, favicon, style.css
-docs/                  this document and the generated docx
-make_docs.py           regenerates the docx
+docs/                  this document and screenshots
 ```
 
 ## The core engine
