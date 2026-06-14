@@ -12,7 +12,7 @@ import streamlit as st
 
 import theme
 import ui
-from services import auth
+from services import auth, db
 
 #brand assets, anchored to this file so the paths work regardless of working directory
 _ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
@@ -47,6 +47,21 @@ def login_screen() -> None:
     left, middle, right = st.columns([1, 1.4, 1])
     with middle:
         _centered_logo()
+
+        #guest mode: with no Supabase configured, skip accounts entirely so the app
+        #can be run and explored without any database setup. saved strategies then
+        #live in the session only (see services/storage.py).
+        if not db.has_db():
+            with st.container(border=True):
+                st.info(
+                    "Demo mode — no database is configured, so there are no accounts. "
+                    "Click below to explore StratLab. Strategies you save are kept for "
+                    "this session only."
+                )
+                if st.button("Enter StratLab (guest)", type="primary", use_container_width=True):
+                    st.session_state.username = "guest"
+                    st.rerun()
+            return
 
         with st.container(border=True):
             login_tab, register_tab = st.tabs(["Log in", "Register"])
@@ -111,3 +126,4 @@ if "username" not in st.session_state:
     login_screen()
 else:
     main_app()
+
