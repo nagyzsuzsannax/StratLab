@@ -76,12 +76,17 @@ def volatility(returns: pd.Series, periods_per_year: int = TRADING_DAYS, annuali
 
 # ----- risk-adjusted performance -----
 
+#below this, volatility/downside-deviation/beta are treated as zero (floating-point noise
+#on a flat equity curve can leave a tiny non-zero residual instead of an exact 0.0)
+_NEAR_ZERO = 1e-10
+
+
 def sharpe_ratio(returns: pd.Series, rf_per_period: float = 0.0, periods_per_year: int = TRADING_DAYS) -> float:
     """Annualised Sharpe ratio: SR = mean(R - Rf) / sigma, annualised (mean * P) / (sigma * sqrt(P))."""
     excess = returns - rf_per_period
     ann_excess = excess.mean() * periods_per_year
     ann_vol = excess.std(ddof=1) * (periods_per_year ** 0.5)
-    return float(ann_excess / ann_vol) if ann_vol else float("nan")
+    return float(ann_excess / ann_vol) if ann_vol > _NEAR_ZERO else float("nan")
 
 
 def sortino_ratio(returns: pd.Series, rf_per_period: float = 0.0, periods_per_year: int = TRADING_DAYS) -> float:
@@ -89,7 +94,7 @@ def sortino_ratio(returns: pd.Series, rf_per_period: float = 0.0, periods_per_ye
     excess = returns - rf_per_period
     downside = excess[excess < 0]
     downside_dev = float((downside.pow(2).mean()) ** 0.5) if len(downside) else 0.0
-    if downside_dev == 0:
+    if downside_dev <= _NEAR_ZERO:
         return float("nan")
     ann_excess = excess.mean() * periods_per_year
     return float(ann_excess / (downside_dev * (periods_per_year ** 0.5)))
@@ -98,7 +103,7 @@ def sortino_ratio(returns: pd.Series, rf_per_period: float = 0.0, periods_per_ye
 def treynor_ratio(returns: pd.Series, beta: float, rf_per_period: float = 0.0, periods_per_year: int = TRADING_DAYS) -> float:
     """Annualised excess return per unit of systematic risk (beta)."""
     ann_excess = (returns - rf_per_period).mean() * periods_per_year
-    return float(ann_excess / beta) if beta else float("nan")
+    return float(ann_excess / beta) if abs(beta) > _NEAR_ZERO else float("nan")
 
 
 # ----- distribution shape -----

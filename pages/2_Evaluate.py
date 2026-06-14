@@ -214,7 +214,7 @@ def _cost_metrics(result: dict) -> None:
     """Render the three cost KPI cards: Gross CAGR, Cost Drag and Annual Turnover."""
     net_cagr = measures.cagr(result["portfolio"])
     gross_cagr = measures.cagr(result["gross"])
-    cost_drag = (1 + gross_cagr) / (1 + net_cagr) - 1
+    cost_drag = (1 + gross_cagr) / (1 + net_cagr) - 1 if 1 + net_cagr else float("nan")
     cards = st.columns(3)
     with cards[0]:
         ui.kpi_card("Gross CAGR", theme.format_pct(gross_cagr),
