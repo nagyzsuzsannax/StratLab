@@ -14,6 +14,20 @@ from supabase import Client, create_client
 # credentials live in .streamlit/secrets.toml (never committed) under a [supabase] section.
 
 
+def has_db() -> bool:
+    """True if Supabase credentials are configured, False otherwise.
+
+    When no secrets are present, the app falls back to a guest mode (see app.py
+    and services/storage.py) so it can be run and explored without any database
+    setup. Accessing st.secrets with no secrets file raises, so we guard it.
+    """
+    try:
+        config = st.secrets["supabase"]
+        return bool(config.get("url")) and bool(config.get("key"))
+    except Exception:
+        return False
+
+
 @st.cache_resource
 def get_client() -> Client:
     """Return a cached Supabase client built from .streamlit/secrets.toml."""
